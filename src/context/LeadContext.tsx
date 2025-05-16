@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { initialData } from '../data/mockData';
 import { Board, Lead, Status, Priority } from '../types';
@@ -154,9 +153,8 @@ export const LeadProvider: React.FC<{ children: React.ReactNode }> = ({ children
       },
     }));
 
-    toast({
-      title: "Lead status updated",
-      description: `${board.leads[draggableId].name} moved to ${destColumn.title}`,
+    toast(`Lead status updated`, {
+      description: `${board.leads[draggableId].name} moved to ${destColumn.title}`
     });
   };
 
@@ -188,9 +186,8 @@ export const LeadProvider: React.FC<{ children: React.ReactNode }> = ({ children
       },
     }));
 
-    toast({
-      title: "Lead added",
-      description: `${newLead.name} has been added to ${column.title}`,
+    toast(`Lead added`, {
+      description: `${newLead.name} has been added to ${column.title}`
     });
 
     return id;
@@ -241,9 +238,8 @@ export const LeadProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }));
     }
 
-    toast({
-      title: "Lead updated",
-      description: `${updatedLead.name} has been updated`,
+    toast(`Lead updated`, {
+      description: `${updatedLead.name} has been updated`
     });
   };
 
@@ -267,9 +263,8 @@ export const LeadProvider: React.FC<{ children: React.ReactNode }> = ({ children
       leads: newLeads,
     }));
 
-    toast({
-      title: "Lead deleted",
-      description: `${leadToDelete.name} has been removed`,
+    toast(`Lead deleted`, {
+      description: `${leadToDelete.name} has been removed`
     });
   };
 
@@ -314,9 +309,8 @@ export const LeadProvider: React.FC<{ children: React.ReactNode }> = ({ children
       },
     }));
 
-    toast({
-      title: "Status updated",
-      description: `${lead.name} moved to ${newColumn.title}`,
+    toast(`Status updated`, {
+      description: `${lead.name} moved to ${newColumn.title}`
     });
   };
 
@@ -338,9 +332,8 @@ export const LeadProvider: React.FC<{ children: React.ReactNode }> = ({ children
       },
     }));
 
-    toast({
-      title: "Priority updated",
-      description: `${lead.name} priority set to ${newPriority}`,
+    toast(`Priority updated`, {
+      description: `${lead.name} priority set to ${newPriority}`
     });
   };
 

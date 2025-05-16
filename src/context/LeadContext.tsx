@@ -1,9 +1,8 @@
 
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useContext, useState, useEffect } from 'react';
 import { initialData } from '../data/mockData';
 import { Board, Lead, Status, Priority } from '../types';
 import { toast } from 'sonner';
-import { useToast } from '../hooks/use-toast';
 
 interface LeadContextType {
   board: Board;
@@ -18,9 +17,70 @@ interface LeadContextType {
 
 const LeadContext = createContext<LeadContextType | undefined>(undefined);
 
+const STORAGE_KEY = 'leadflow-board';
+const EXPIRY_KEY = 'leadflow-board-expiry';
+const RETENTION_DAYS = 30;
+
 export const LeadProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [board, setBoard] = useState<Board>(initialData);
-  const { toast } = useToast();
+
+  // Load data from localStorage on component mount
+  useEffect(() => {
+    const loadBoardData = () => {
+      try {
+        const storedData = localStorage.getItem(STORAGE_KEY);
+        const expiryDate = localStorage.getItem(EXPIRY_KEY);
+        
+        if (storedData && expiryDate) {
+          // Check if the data has expired
+          const now = new Date();
+          const expiry = new Date(expiryDate);
+          
+          if (now < expiry) {
+            // Data is still valid
+            const parsedData = JSON.parse(storedData);
+            setBoard(parsedData);
+          } else {
+            // Data has expired, use initial data and set new expiry
+            setNewExpiry();
+          }
+        } else {
+          // No stored data, use initial data and set expiry
+          setNewExpiry();
+        }
+      } catch (error) {
+        console.error('Error loading board data:', error);
+        // Use initial data as fallback
+        setNewExpiry();
+      }
+    };
+
+    loadBoardData();
+  }, []);
+
+  // Save data to localStorage whenever board changes
+  useEffect(() => {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(board));
+      
+      // Only set new expiry if it doesn't exist
+      if (!localStorage.getItem(EXPIRY_KEY)) {
+        setNewExpiry();
+      }
+    } catch (error) {
+      console.error('Error saving board data:', error);
+      toast.error("Failed to save data", {
+        description: "Your changes may not persist after closing the browser"
+      });
+    }
+  }, [board]);
+
+  // Helper to set a new expiry date (30 days from now)
+  const setNewExpiry = () => {
+    const expiryDate = new Date();
+    expiryDate.setDate(expiryDate.getDate() + RETENTION_DAYS);
+    localStorage.setItem(EXPIRY_KEY, expiryDate.toISOString());
+  };
 
   const updateBoardAfterDrag = (result: any) => {
     const { destination, source, draggableId } = result;

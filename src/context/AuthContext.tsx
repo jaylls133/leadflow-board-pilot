@@ -18,18 +18,47 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+const USER_STORAGE_KEY = 'leadflow-user';
+const USER_EXPIRY_KEY = 'leadflow-user-expiry';
+const RETENTION_DAYS = 30;
+
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
-    // Check if user is logged in from localStorage
-    const storedUser = localStorage.getItem('leadflow-user');
-    if (storedUser) {
-      setUser(JSON.parse(storedUser));
-    }
-    setLoading(false);
+    // Check if user is logged in from localStorage and if session is still valid
+    const loadUserData = () => {
+      const storedUser = localStorage.getItem(USER_STORAGE_KEY);
+      const expiryDate = localStorage.getItem(USER_EXPIRY_KEY);
+      
+      if (storedUser && expiryDate) {
+        // Check if the user data has expired
+        const now = new Date();
+        const expiry = new Date(expiryDate);
+        
+        if (now < expiry) {
+          // User session is still valid
+          setUser(JSON.parse(storedUser));
+        } else {
+          // User session has expired, log out
+          setUser(null);
+          localStorage.removeItem(USER_STORAGE_KEY);
+          localStorage.removeItem(USER_EXPIRY_KEY);
+        }
+      }
+      setLoading(false);
+    };
+
+    loadUserData();
   }, []);
+
+  // Helper to set a new expiry date (30 days from now)
+  const setNewExpiry = () => {
+    const expiryDate = new Date();
+    expiryDate.setDate(expiryDate.getDate() + RETENTION_DAYS);
+    localStorage.setItem(USER_EXPIRY_KEY, expiryDate.toISOString());
+  };
 
   const login = async (email: string, password: string): Promise<boolean> => {
     // In a real app, you'd make an API call here
@@ -48,7 +77,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         };
         
         setUser(userData);
-        localStorage.setItem('leadflow-user', JSON.stringify(userData));
+        localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(userData));
+        setNewExpiry();
         
         toast.success("Login successful", {
           description: "Welcome back!"
@@ -88,7 +118,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       };
       
       setUser(userData);
-      localStorage.setItem('leadflow-user', JSON.stringify(userData));
+      localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(userData));
+      setNewExpiry();
       
       toast.success("Registration successful", {
         description: "Welcome to LeadFlow!"
@@ -108,7 +139,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const logout = () => {
     setUser(null);
-    localStorage.removeItem('leadflow-user');
+    localStorage.removeItem(USER_STORAGE_KEY);
+    localStorage.removeItem(USER_EXPIRY_KEY);
     toast.success("Logged out", {
       description: "You have been logged out successfully"
     });

@@ -50,26 +50,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setUser(userData);
         localStorage.setItem('leadflow-user', JSON.stringify(userData));
         
-        toast({
-          title: "Login successful",
-          description: "Welcome back!",
+        toast.success("Login successful", {
+          description: "Welcome back!"
         });
         
         return true;
       } else {
-        toast({
-          title: "Login failed",
-          description: "Invalid email or password",
-          variant: "destructive",
+        toast.error("Login failed", {
+          description: "Invalid email or password"
         });
         return false;
       }
     } catch (error) {
       console.error('Login error:', error);
-      toast({
-        title: "Login error",
-        description: "An unexpected error occurred",
-        variant: "destructive",
+      toast.error("Login error", {
+        description: "An unexpected error occurred"
       });
       return false;
     } finally {
@@ -95,18 +90,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setUser(userData);
       localStorage.setItem('leadflow-user', JSON.stringify(userData));
       
-      toast({
-        title: "Registration successful",
-        description: "Welcome to LeadFlow!",
+      toast.success("Registration successful", {
+        description: "Welcome to LeadFlow!"
       });
       
       return true;
     } catch (error) {
       console.error('Registration error:', error);
-      toast({
-        title: "Registration failed",
-        description: "An unexpected error occurred",
-        variant: "destructive",
+      toast.error("Registration failed", {
+        description: "An unexpected error occurred"
       });
       return false;
     } finally {
@@ -117,9 +109,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const logout = () => {
     setUser(null);
     localStorage.removeItem('leadflow-user');
-    toast({
-      title: "Logged out",
-      description: "You have been logged out successfully",
+    toast.success("Logged out", {
+      description: "You have been logged out successfully"
     });
   };
 
